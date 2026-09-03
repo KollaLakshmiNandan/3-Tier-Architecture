@@ -1,13 +1,11 @@
+
 stages:
   - test
 
 unit_test:
-  stage: test
   image: python:3.12
-
-  before_script:
+  stage: test
+  script:
     - cd backend
     - pip install -r requirements.txt
-
-  script:
     - python -m unittest test_app.py
