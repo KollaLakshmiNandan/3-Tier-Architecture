@@ -1,6 +1,6 @@
-
 stages:
   - test
+  - sonarqube
 
 unit_test:
   image: python:3.12
@@ -9,3 +9,14 @@ unit_test:
     - cd backend
     - pip install -r requirements.txt
     - python -m unittest test_app.py
+
+sonarqube-check:
+  stage: sonarqube
+  tags:
+    - macos
+  script:
+    - docker run --rm
+      -e SONAR_HOST_URL="$SONAR_HOST_URL"
+      -e SONAR_TOKEN="$SONAR_TOKEN"
+      -v "$CI_PROJECT_DIR:/usr/src"
+      sonarsource/sonar-scanner-cli
