@@ -1,6 +1,7 @@
 stages:
   - test
   - sonarqube
+  - docker
 
 unit_test:
   image: python:3.12
@@ -20,3 +21,10 @@ sonarqube-check:
       -e SONAR_TOKEN="$SONAR_TOKEN"
       -v "$CI_PROJECT_DIR:/usr/src"
       sonarsource/sonar-scanner-cli
+
+docker-build:
+  stage: docker
+  tags:
+    - macos
+  script:
+    - docker build -t claims-backend:$CI_COMMIT_SHORT_SHA ./backend
