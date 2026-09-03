@@ -196,7 +196,7 @@ function App() {
                         <div className="hero">
                             <div>
                                 <p className="small-title">CLAIMS PLATFORM</p>
-                                <h1>Claims Management</h1>
+                                <h1>Claims Management Application</h1>
                                 <p>
                                     Manage customer claims, review their status
                                     and track claim activity from one place.
