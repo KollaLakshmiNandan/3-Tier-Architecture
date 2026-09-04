@@ -3,6 +3,8 @@ stages:
   - sonarqube
   - docker
   - scan
+  - publish
+
 unit_test:
   image: python:3.12
   stage: test
@@ -28,6 +30,7 @@ docker-build:
     - macos
   script:
     - docker build -t claims-backend:$CI_COMMIT_SHORT_SHA ./backend
+
 trivy-scan:
   stage: scan
   tags:
@@ -35,3 +38,12 @@ trivy-scan:
   script:
     - export PATH="/opt/homebrew/bin:$PATH"
     - trivy image --exit-code 0 --severity HIGH,CRITICAL claims-backend:$CI_COMMIT_SHORT_SHA
+
+publish-image:
+  stage: publish
+  tags:
+    - macos
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+    - docker tag claims-backend:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
