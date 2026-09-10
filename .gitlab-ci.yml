@@ -6,12 +6,12 @@ stages:
   - publish
 
 unit_test:
-  image: python:3.12
   stage: test
   script:
     - cd backend
-    - pip install -r requirements.txt
-    - python -m unittest test_app.py
+    - python3 -m venv .venv
+    - .venv/bin/python -m pip install -r requirements.txt
+    - .venv/bin/python -m unittest test_app.py
 
 sonarqube-check:
   stage: sonarqube
