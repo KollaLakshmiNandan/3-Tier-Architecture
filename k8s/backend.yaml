@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claims-backend
+  namespace: claims-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: claims-backend
+  template:
+    metadata:
+      labels:
+        app: claims-backend
+    spec:
+      containers:
+        - name: backend
+          image: registry.gitlab.com/midhtech-group3/3-tier-architecture@sha256:801a65ce4fac9d51c3c797bc7f6a8ce4c5f2197457bdece182c222241d78a078
+          ports:
+            - containerPort: 5000
+
+          envFrom:
+            - configMapRef:
+                name: claims-config
+
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: claims-secret
+                  key: DB_PASSWORD
+
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 6
+
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: claims-backend
+  namespace: claims-dev
+spec:
+  selector:
+    app: claims-backend
+  ports:
+    - port: 5000
+      targetPort: 5000
+  type: ClusterIP
