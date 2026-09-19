@@ -1,0 +1,21 @@
+image:
+  repository: registry.gitlab.com/midhtech-group3/3-tier-architecture
+  tag: "@sha256:801a65ce4fac9d51c3c797bc7f6a8ce4c5f2197457bdece182c222241d78a078"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: gitlab-registry
+
+service:
+  type: ClusterIP
+  port: 5000
+
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: http
+
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: http
