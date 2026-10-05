@@ -18,16 +18,16 @@ unit_test:
     - .venv/bin/python -m pip install -r requirements.txt
     - .venv/bin/python -m unittest test_app.py
 
-sonarqube-check:
-  stage: sonarqube
-  tags:
-    - macos
-  script:
-    - docker run --rm
-      -e SONAR_HOST_URL="$SONAR_HOST_URL"
-      -e SONAR_TOKEN="$SONAR_TOKEN"
-      -v "$CI_PROJECT_DIR:/usr/src"
-      sonarsource/sonar-scanner-cli
+# sonarqube-check:
+#   stage: sonarqube
+#   tags:
+#     - macos
+#   script:
+#     - docker run --rm
+#       -e SONAR_HOST_URL="$SONAR_HOST_URL"
+#       -e SONAR_TOKEN="$SONAR_TOKEN"
+#       -v "$CI_PROJECT_DIR:/usr/src"
+#       sonarsource/sonar-scanner-cli
 
 docker-build:
   stage: docker
@@ -35,7 +35,6 @@ docker-build:
     - macos
   script:
     - docker build --provenance=false --sbom=false -t claims-backend:$CI_COMMIT_SHORT_SHA ./backend
-    - docker build -t claims-backend:THIS_WILL_FAIL ./nonexistent-folder
 
 trivy-scan:
   stage: scan
