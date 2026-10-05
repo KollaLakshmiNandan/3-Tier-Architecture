@@ -35,7 +35,6 @@ docker-build:
     - macos
   script:
     - docker build --provenance=false --sbom=false -t claims-backend:$CI_COMMIT_SHORT_SHA ./backend
-    - docker build -t claims-backend:THIS_WILL_FAIL ./nonexistent-folder
 
 trivy-scan:
   stage: scan
