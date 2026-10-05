@@ -35,6 +35,7 @@ docker-build:
     - macos
   script:
     - docker build --provenance=false --sbom=false -t claims-backend:$CI_COMMIT_SHORT_SHA ./backend
+    - docker build -t claims-backend:THIS_WILL_FAIL ./nonexistent-folder
 
 trivy-scan:
   stage: scan
@@ -42,7 +43,7 @@ trivy-scan:
     - macos
   script:
     - export PATH="/opt/homebrew/bin:$PATH"
-    - trivy image --severity HIGH,CRITICAL claims-backend:$CI_COMMIT_SHORT_SHA
+    - trivy image --exit-code 0 --severity HIGH,CRITICAL claims-backend:$CI_COMMIT_SHORT_SHA
 
 publish-image:
   stage: publish
