@@ -42,7 +42,7 @@ trivy-scan:
     - macos
   script:
     - export PATH="/opt/homebrew/bin:$PATH"
-    - trivy image --exit-code 0 --severity HIGH,CRITICAL claims-backend:$CI_COMMIT_SHORT_SHA
+    - trivy image --severity HIGH,CRITICAL claims-backend:$CI_COMMIT_SHORT_SHA
 
 publish-image:
   stage: publish
