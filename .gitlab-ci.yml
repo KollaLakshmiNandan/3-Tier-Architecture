@@ -3,8 +3,8 @@ variables:
 
 stages:
   - test
-  - sonarqube
-  - docker
+  # - sonarqube
+  # - docker
   - scan
   - publish
 
@@ -18,16 +18,16 @@ unit_test:
     - .venv/bin/python -m pip install -r requirements.txt
     - .venv/bin/python -m unittest test_app.py
 
-# sonarqube-check:
-#   stage: sonarqube
-#   tags:
-#     - macos
-#   script:
-#     - docker run --rm
-#       -e SONAR_HOST_URL="$SONAR_HOST_URL"
-#       -e SONAR_TOKEN="$SONAR_TOKEN"
-#       -v "$CI_PROJECT_DIR:/usr/src"
-#       sonarsource/sonar-scanner-cli
+sonarqube-check:
+  stage: sonarqube
+  tags:
+    - macos
+  script:
+    - docker run --rm
+      -e SONAR_HOST_URL="$SONAR_HOST_URL"
+      -e SONAR_TOKEN="$SONAR_TOKEN"
+      -v "$CI_PROJECT_DIR:/usr/src"
+      sonarsource/sonar-scanner-cli
 
 docker-build:
   stage: docker
