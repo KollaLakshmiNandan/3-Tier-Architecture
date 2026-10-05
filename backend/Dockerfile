@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir --upgrade "pip>=26.2.0" "setuptools>=83.0.0" "msg
 
 COPY app.py .
 
-USER appuser
+# USER appuser
 
 EXPOSE 5000
 
