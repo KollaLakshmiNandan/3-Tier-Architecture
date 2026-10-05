@@ -3,7 +3,7 @@ variables:
 
 stages:
   - test
-  # - sonarqube
+  - sonarqube
   - docker
   - scan
   - publish
