@@ -63,7 +63,7 @@ publish-image:
 
 # =========================
 # USE CASE 2
-# PROMOTE RELEASE
+# PROMOTE AND ROLLBACK
 # =========================
 
 deploy-dev:
@@ -74,7 +74,7 @@ deploy-dev:
     - kubectl config current-context
     - kubectl get namespace dev
     - kubectl set image deployment/claims-backend
-      3-tier-architecture=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+      claims-backend=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
       -n dev
     - kubectl rollout status deployment/claims-backend -n dev --timeout=120s
     - kubectl get deployment claims-backend -n dev
