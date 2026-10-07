@@ -7,6 +7,13 @@ stages:
   - docker
   - scan
   - publish
+  - dev
+  - stage
+  - prod-like
+
+# =========================
+# USE CASE 1
+# =========================
 
 unit_test:
   stage: test
@@ -52,3 +59,77 @@ publish-image:
     - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
     - docker tag claims-backend:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+
+# =========================
+# USE CASE 2
+# PROMOTE RELEASE
+# =========================
+
+deploy-dev:
+  stage: dev
+  tags:
+    - macos
+  script:
+    - kubectl config current-context
+    - kubectl get namespace dev
+    - kubectl set image deployment/claims-backend
+      3-tier-architecture=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+      -n dev
+    - kubectl rollout status deployment/claims-backend -n dev --timeout=120s
+    - kubectl get deployment claims-backend -n dev
+      -o jsonpath='{.spec.template.spec.containers[*].image}{"\n"}'
+  environment:
+    name: dev
+
+
+promote-stage:
+  stage: stage
+  tags:
+    - macos
+  when: manual
+  script:
+    - kubectl config current-context
+    - kubectl get namespace stage
+    - kubectl set image deployment/claims-backend
+      3-tier-architecture=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+      -n stage
+    - kubectl rollout status deployment/claims-backend -n stage --timeout=120s
+    - kubectl get deployment claims-backend -n stage
+      -o jsonpath='{.spec.template.spec.containers[*].image}{"\n"}'
+  environment:
+    name: stage
+
+
+promote-prod-like:
+  stage: prod-like
+  tags:
+    - macos
+  when: manual
+  script:
+    - kubectl config current-context
+    - kubectl get namespace prod-like
+    - kubectl set image deployment/claims-backend
+      3-tier-architecture=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+      -n prod-like
+    - kubectl rollout status deployment/claims-backend -n prod-like --timeout=120s
+    - kubectl get deployment claims-backend -n prod-like
+      -o jsonpath='{.spec.template.spec.containers[*].image}{"\n"}'
+  environment:
+    name: prod-like
+
+
+rollback-prod-like:
+  stage: prod-like
+  tags:
+    - macos
+  when: manual
+  script:
+    - kubectl config current-context
+    - kubectl rollout undo deployment/claims-backend -n prod-like
+    - kubectl rollout status deployment/claims-backend -n prod-like --timeout=120s
+    - kubectl get deployment claims-backend -n prod-like
+      -o jsonpath='{.spec.template.spec.containers[*].image}{"\n"}'
+    - kubectl rollout history deployment/claims-backend -n prod-like
+  environment:
+    name: prod-like
