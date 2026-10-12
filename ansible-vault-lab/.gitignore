@@ -1,0 +1,24 @@
+# Private keys and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+vault-password.txt
+.vault_pass
+
+# Backup and temporary files
+*.bak
+*.swp
+*~
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Ansible artifacts
+*.retry
+
+# macOS artifacts
+.DS_Store

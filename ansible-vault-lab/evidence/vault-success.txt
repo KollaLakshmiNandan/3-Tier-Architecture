@@ -1,0 +1,21 @@
+
+PLAY [Use encrypted application configuration securely] ************************
+
+TASK [Verify application configuration is loaded] ******************************
+ok: [linux-lab] => {
+    "changed": false,
+    "msg": "Application configuration loaded successfully."
+}
+
+TASK [Display non-sensitive configuration] *************************************
+ok: [linux-lab] => {
+    "msg": [
+        "Application: claims-management",
+        "Environment: dev",
+        "API token: [REDACTED]"
+    ]
+}
+
+PLAY RECAP *********************************************************************
+linux-lab                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+

@@ -1,0 +1,27 @@
+---
+- name: Automate Linux web server operations
+  hosts: linux_servers
+  become: true
+
+  tasks:
+    - name: Install Nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Ensure Nginx is running and enabled
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Create operations status page
+      ansible.builtin.copy:
+        dest: /var/www/html/index.html
+        content: |
+          Ansible Operations Lab
+          Status: Managed by Ansible
+        owner: root
+        group: root
+        mode: "0644"

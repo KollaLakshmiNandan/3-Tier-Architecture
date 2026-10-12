@@ -1,0 +1,23 @@
+---
+- name: Use encrypted application configuration securely
+  hosts: linux_servers
+  gather_facts: false
+  vars_files:
+    - ../group_vars/linux_servers.yml
+
+  tasks:
+    - name: Verify application configuration is loaded
+      ansible.builtin.assert:
+        that:
+          - app_config.app_name == "claims-management"
+          - app_config.environment == "dev"
+          - app_config.api_token | length > 0
+        success_msg: "Application configuration loaded successfully."
+        fail_msg: "Application configuration is missing or invalid."
+
+    - name: Display non-sensitive configuration
+      ansible.builtin.debug:
+        msg:
+          - "Application: {{ app_config.app_name }}"
+          - "Environment: {{ app_config.environment }}"
+          - "API token: [REDACTED]"

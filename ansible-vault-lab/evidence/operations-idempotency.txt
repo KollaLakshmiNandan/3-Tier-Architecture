@@ -1,0 +1,19 @@
+
+PLAY [Automate Linux web server operations] ************************************
+
+TASK [Gathering Facts] *********************************************************
+[WARNING]: Host 'linux-lab' is using the discovered Python interpreter at '/usr/bin/python3.12', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.21/reference_appendices/interpreter_discovery.html for more information.
+ok: [linux-lab]
+
+TASK [Install Nginx] ***********************************************************
+ok: [linux-lab]
+
+TASK [Ensure Nginx is running and enabled] *************************************
+ok: [linux-lab]
+
+TASK [Create operations status page] *******************************************
+ok: [linux-lab]
+
+PLAY RECAP *********************************************************************
+linux-lab                  : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
