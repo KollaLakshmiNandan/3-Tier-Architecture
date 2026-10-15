@@ -1,4 +1,6 @@
 import os
+import time
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import psycopg2
@@ -7,7 +9,48 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 CORS(app)
+REQUEST_COUNT = Counter(
+    "claims_http_requests_total",
+    "Total HTTP requests",
+    ["method", "endpoint", "status"]
+)
 
+REQUEST_DURATION = Histogram(
+    "claims_http_request_duration_seconds",
+    "HTTP request duration in seconds",
+    ["method", "endpoint"]
+)
+
+@app.before_request
+def start_request_timer():
+    request.start_time = time.perf_counter()
+
+@app.after_request
+def record_request_metrics(response):
+    endpoint = request.url_rule.rule if request.url_rule else "unmatched"
+
+    REQUEST_COUNT.labels(
+        method=request.method,
+        endpoint=endpoint,
+        status=str(response.status_code)
+    ).inc()
+
+    duration = time.perf_counter() - getattr(
+        request, "start_time", time.perf_counter()
+    )
+
+    REQUEST_DURATION.labels(
+        method=request.method,
+        endpoint=endpoint
+    ).observe(duration)
+
+    return response
+
+@app.route("/metrics")
+def metrics():
+    return generate_latest(), 200, {
+        "Content-Type": CONTENT_TYPE_LATEST
+    }
 
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "localhost"),

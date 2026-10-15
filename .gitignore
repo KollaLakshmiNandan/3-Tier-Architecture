@@ -5,3 +5,6 @@ __pycache__/
 *.pyc
 builds/
 .env
+
+# Local observability secrets
+.env.observability
