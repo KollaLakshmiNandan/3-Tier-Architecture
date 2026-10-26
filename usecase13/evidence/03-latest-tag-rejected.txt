@@ -1,0 +1,7 @@
+Error from server: error when creating "usecase13/tests/non-compliant-pod.yaml": admission webhook "validate.kyverno.svc-fail" denied the request: 
+
+resource Pod/default/test-latest was blocked due to the following policies 
+
+disallow-latest-tag:
+  require-image-tag: 'validation error: Using the latest image tag is not allowed. Specify an explicit image tag. rule require-image-tag failed at path /spec/containers/0/image/'
+Command exit code: 1

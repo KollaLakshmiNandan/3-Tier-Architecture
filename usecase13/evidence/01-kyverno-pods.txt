@@ -1,0 +1,5 @@
+NAME                                            READY   STATUS    RESTARTS   AGE     IP            NODE                    NOMINATED NODE   READINESS GATES
+kyverno-admission-controller-75bb8dfc78-wnjjh   1/1     Running   0          5h25m   10.244.0.23   desktop-control-plane   <none>           <none>
+kyverno-background-controller-9fdc784fb-mphdh   1/1     Running   0          5h25m   10.244.0.25   desktop-control-plane   <none>           <none>
+kyverno-cleanup-controller-6484bbdd59-qdh55     1/1     Running   0          5h25m   10.244.0.24   desktop-control-plane   <none>           <none>
+kyverno-reports-controller-c69bfbdc6-rpl8t      1/1     Running   0          5h25m   10.244.0.26   desktop-control-plane   <none>           <none>

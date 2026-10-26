@@ -1,0 +1,2 @@
+NAME                  ADMISSION   BACKGROUND   READY   AGE     FAILURE POLICY   VALIDATE   MUTATE   GENERATE   VERIFY IMAGES   MESSAGE
+disallow-latest-tag   true        true         True    4h35m                    1          0        0          0               Ready
