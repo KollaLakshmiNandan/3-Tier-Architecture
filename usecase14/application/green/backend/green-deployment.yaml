@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claims-backend-green
+  namespace: usecase14-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: claims-backend
+      version: green
+  template:
+    metadata:
+      labels:
+        app: claims-backend
+        version: green
+    spec:
+      containers:
+        - name: backend
+          image: usecase14-claims-backend:green-v2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: DB_HOST
+              value: claims-postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: claims-db-secret
+                  key: POSTGRES_DB
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: claims-db-secret
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: claims-db-secret
+                  key: POSTGRES_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: claims-backend-green
+  namespace: usecase14-lab
+spec:
+  type: ClusterIP
+  selector:
+    app: claims-backend
+    version: green
+  ports:
+    - port: 5000
+      targetPort: 5000

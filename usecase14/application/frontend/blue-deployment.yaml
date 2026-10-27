@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claims-frontend-blue
+  namespace: usecase14-lab
+  labels:
+    app: claims-frontend
+    version: blue
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: claims-frontend
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: claims-frontend
+        version: blue
+    spec:
+      containers:
+        - name: frontend
+          image: usecase14-claims-frontend:blue-v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: claims-frontend-blue
+  namespace: usecase14-lab
+spec:
+  selector:
+    app: claims-frontend
+    version: blue
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

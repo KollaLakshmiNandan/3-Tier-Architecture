@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claims-frontend-green
+  namespace: usecase14-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: claims-frontend
+      version: green
+  template:
+    metadata:
+      labels:
+        app: claims-frontend
+        version: green
+    spec:
+      containers:
+        - name: frontend
+          image: usecase14-claims-frontend:green-v2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: claims-frontend-green
+  namespace: usecase14-lab
+spec:
+  type: ClusterIP
+  selector:
+    app: claims-frontend
+    version: green
+  ports:
+    - port: 8080
+      targetPort: 8080
