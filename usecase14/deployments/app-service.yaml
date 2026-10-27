@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: blue-green-service
+  namespace: usecase14-lab
+spec:
+  type: ClusterIP
+  selector:
+    app: blue-green-demo
+    version: blue
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80

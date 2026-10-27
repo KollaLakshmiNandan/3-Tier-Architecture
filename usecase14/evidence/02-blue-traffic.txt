@@ -1,0 +1,12 @@
+Service currently selects version: blue
+Checking ready Service endpoints...
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME                 ENDPOINTS                       AGE
+blue-green-service   10.244.0.27:80,10.244.0.28:80   2m24s
+Sending HTTP request through the Service...
+BLUE-VERSION-1
+All commands and output from this session will be recorded in container logs, including credentials and sensitive information passed through the command prompt.
+If you don't see a command prompt, try pressing enter.
+pod "blue-green-client" deleted from usecase14-lab namespace
+
+Traffic verification completed.

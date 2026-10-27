@@ -1,0 +1,12 @@
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES       SELECTOR
+deployment.apps/blue-app    2/2     2            2           60s   web          nginx:1.28   app=blue-green-demo,version=blue
+deployment.apps/green-app   2/2     2            2           60s   web          nginx:1.28   app=blue-green-demo,version=green
+
+NAME                             READY   STATUS    RESTARTS   AGE   IP            NODE                    NOMINATED NODE   READINESS GATES
+pod/blue-app-8699955b5c-2wxwc    1/1     Running   0          60s   10.244.0.27   desktop-control-plane   <none>           <none>
+pod/blue-app-8699955b5c-dj8x8    1/1     Running   0          60s   10.244.0.28   desktop-control-plane   <none>           <none>
+pod/green-app-74494dc49d-kxsjm   1/1     Running   0          60s   10.244.0.30   desktop-control-plane   <none>           <none>
+pod/green-app-74494dc49d-xrt65   1/1     Running   0          60s   10.244.0.29   desktop-control-plane   <none>           <none>
+
+NAME                         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE   SELECTOR
+service/blue-green-service   ClusterIP   10.96.47.173   <none>        80/TCP    60s   app=blue-green-demo,version=blue

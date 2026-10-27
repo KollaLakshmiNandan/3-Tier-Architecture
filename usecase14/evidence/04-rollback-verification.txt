@@ -1,0 +1,14 @@
+Service currently selects version: blue
+Checking ready Service endpoints...
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME                 ENDPOINTS                       AGE
+blue-green-service   10.244.0.27:80,10.244.0.28:80   4m58s
+Sending HTTP request through the Service...
+BLUE-VERSION-1
+All commands and output from this session will be recorded in container logs, including credentials and sensitive information passed through the command prompt.
+If you don't see a command prompt, try pressing enter.
+warning: couldn't attach to pod/blue-green-client, falling back to streaming logs: Internal error occurred: Internal error occurred: error attaching to container: failed to load task: no running task found: task a7a4edaf2c5d702d99ca3b248d6610ac0297ff4b8452d70bfaa1fe4e4dedc646 not found
+BLUE-VERSION-1
+pod "blue-green-client" deleted from usecase14-lab namespace
+
+Traffic verification completed.
