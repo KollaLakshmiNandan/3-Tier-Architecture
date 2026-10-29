@@ -129,7 +129,7 @@ promote_dev:
   script:
     - test -s usecase15/evidence/ci-rendered/dev.yaml
     - grep -q '@sha256:' usecase15/evidence/ci-rendered/dev.yaml
-    - echo "PASS: Dev promotion readiness validated; no deployment performed."
+    - 'echo "PASS: Dev promotion readiness validated; no deployment performed."'
 
 promote_qa:
   stage: qa
@@ -143,7 +143,7 @@ promote_qa:
   script:
     - test -s usecase15/evidence/ci-rendered/qa.yaml
     - grep -q '@sha256:' usecase15/evidence/ci-rendered/qa.yaml
-    - echo "PASS: QA promotion readiness validated; no deployment performed."
+    - 'echo "PASS: QA promotion readiness validated; no deployment performed."'
 
 # Manual gates; each runs validation only, not a Kubernetes deployment.
 promote_stage:
@@ -160,7 +160,7 @@ promote_stage:
   script:
     - test -s usecase15/evidence/ci-rendered/stage.yaml
     - grep -q '@sha256:' usecase15/evidence/ci-rendered/stage.yaml
-    - echo "PASS: Stage promotion gate approved; no deployment performed."
+    - 'echo "PASS: Stage promotion gate approved; no deployment performed."'
 
 promote_prod_like:
   stage: prod-like
@@ -176,4 +176,4 @@ promote_prod_like:
   script:
     - test -s usecase15/evidence/ci-rendered/prod-like.yaml
     - grep -q '@sha256:' usecase15/evidence/ci-rendered/prod-like.yaml
-    - echo "PASS: Prod-like promotion gate approved; no deployment performed."
+    - 'echo "PASS: Prod-like promotion gate approved; no deployment performed."'
