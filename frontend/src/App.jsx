@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 const API = "http://localhost:5000/api";
 
 function App() {
-    const [page, setPage] = useState("home");
+    const [page, setPage] = useState("login");
     const [claims, setClaims] = useState([]);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
@@ -32,7 +32,9 @@ function App() {
 
     async function loadClaims() {
         try {
-            const response = await fetch(`${API}/claims`);
+            const response = await fetch(`${API}/claims`, {
+    credentials: "include"
+});
             const data = await response.json();
 
             if (response.ok) {
@@ -51,6 +53,7 @@ function App() {
         try {
             const response = await fetch(`${API}/claims`, {
                 method: "POST",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json"
                 },
@@ -107,6 +110,7 @@ function App() {
         try {
             const response = await fetch(`${API}/login`, {
                 method: "POST",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json"
                 },
@@ -121,6 +125,10 @@ function App() {
             }
 
             setMessage(`Welcome ${data.user.name}`);
+            setLoginForm({
+                email: "",
+                password: ""
+            });
             setPage("home");
 
         } catch {
@@ -196,7 +204,7 @@ function App() {
                         <div className="hero">
                             <div>
                                 <p className="small-title">CLAIMS PLATFORM</p>
-                                <h1>Claims Management</h1>
+                                <h1>Claims Management Application</h1>
                                 <p>
                                     Manage customer claims, review their status
                                     and track claim activity from one place.
@@ -288,6 +296,8 @@ function App() {
                             <label>Claim Amount</label>
                             <input
                                 type="number"
+                                min="0.01"
+                                max="9999999999.99"
                                 step="0.01"
                                 value={claimForm.amount}
                                 onChange={e =>
