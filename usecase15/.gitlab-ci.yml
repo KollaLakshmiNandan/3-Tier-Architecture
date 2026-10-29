@@ -2,6 +2,10 @@ stages:
   - test
   - validate
   - evidence
+  - dev
+  - qa
+  - stage
+  - prod-like
 
 variables:
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
@@ -53,6 +57,7 @@ validate_image_digests:
   script:
     - |
       set -eu
+      mkdir -p usecase15/evidence/rendered
       reference=""
       for env in dev qa stage prod-like; do
         file="usecase15/evidence/rendered/${env}.yaml"
@@ -112,3 +117,63 @@ collect_validation_evidence:
       - usecase15/evidence/ci/
       - usecase15/evidence/ci-rendered/
     expire_in: 30 days
+
+# Automatic readiness checks; these do not deploy workloads.
+promote_dev:
+  stage: dev
+  tags:
+    - macos
+  needs:
+    - job: collect_validation_evidence
+      artifacts: true
+  script:
+    - test -s usecase15/evidence/ci-rendered/dev.yaml
+    - grep -q '@sha256:' usecase15/evidence/ci-rendered/dev.yaml
+    - echo "PASS: Dev promotion readiness validated; no deployment performed."
+
+promote_qa:
+  stage: qa
+  tags:
+    - macos
+  needs:
+    - job: collect_validation_evidence
+      artifacts: true
+    - job: promote_dev
+      artifacts: false
+  script:
+    - test -s usecase15/evidence/ci-rendered/qa.yaml
+    - grep -q '@sha256:' usecase15/evidence/ci-rendered/qa.yaml
+    - echo "PASS: QA promotion readiness validated; no deployment performed."
+
+# Manual gates; each runs validation only, not a Kubernetes deployment.
+promote_stage:
+  stage: stage
+  tags:
+    - macos
+  needs:
+    - job: collect_validation_evidence
+      artifacts: true
+    - job: promote_qa
+      artifacts: false
+  when: manual
+  allow_failure: false
+  script:
+    - test -s usecase15/evidence/ci-rendered/stage.yaml
+    - grep -q '@sha256:' usecase15/evidence/ci-rendered/stage.yaml
+    - echo "PASS: Stage promotion gate approved; no deployment performed."
+
+promote_prod_like:
+  stage: prod-like
+  tags:
+    - macos
+  needs:
+    - job: collect_validation_evidence
+      artifacts: true
+    - job: promote_stage
+      artifacts: false
+  when: manual
+  allow_failure: false
+  script:
+    - test -s usecase15/evidence/ci-rendered/prod-like.yaml
+    - grep -q '@sha256:' usecase15/evidence/ci-rendered/prod-like.yaml
+    - echo "PASS: Prod-like promotion gate approved; no deployment performed."
