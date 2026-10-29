@@ -1,0 +1,157 @@
+--- usecase15/evidence/rendered/dev.yaml	2026-10-29 16:29:08
++++ usecase15/evidence/rendered/qa.yaml	2026-10-29 16:29:08
+@@ -4,13 +4,13 @@
+ kind: ConfigMap
+ metadata:
+   name: claims-app-config
+-  namespace: claims-dev
++  namespace: claims-qa
+   labels:
+     app: claims-management
+-    environment: dev
++    environment: qa
+ data:
+-  APP_ENV: "dev"
+-  LOG_LEVEL: "DEBUG"
++  APP_ENV: "qa"
++  LOG_LEVEL: "INFO"
+   DB_HOST: "claims-postgres"
+   DB_PORT: "5432"
+   DB_NAME: "claimsdb"
+@@ -22,17 +22,17 @@
+ kind: Service
+ metadata:
+   name: claims-app-frontend
+-  namespace: claims-dev
++  namespace: claims-qa
+   labels:
+     app: claims-management
+     component: frontend
+-    environment: dev
++    environment: qa
+ spec:
+   type: ClusterIP
+   selector:
+     app: claims-management
+     component: frontend
+-    environment: dev
++    environment: qa
+   ports:
+     - name: http
+       port: 80
+@@ -45,17 +45,17 @@
+ kind: Service
+ metadata:
+   name: claims-app-backend
+-  namespace: claims-dev
++  namespace: claims-qa
+   labels:
+     app: claims-management
+     component: backend
+-    environment: dev
++    environment: qa
+ spec:
+   type: ClusterIP
+   selector:
+     app: claims-management
+     component: backend
+-    environment: dev
++    environment: qa
+   ports:
+     - name: http
+       port: 5000
+@@ -68,24 +68,24 @@
+ kind: Deployment
+ metadata:
+   name: claims-app-frontend
+-  namespace: claims-dev
++  namespace: claims-qa
+   labels:
+     app: claims-management
+     component: frontend
+-    environment: dev
++    environment: qa
+ spec:
+   replicas: 1
+   selector:
+     matchLabels:
+       app: claims-management
+       component: frontend
+-      environment: dev
++      environment: qa
+   template:
+     metadata:
+       labels:
+         app: claims-management
+         component: frontend
+-        environment: dev
++        environment: qa
+     spec:
+       containers:
+         - name: frontend
+@@ -96,11 +96,11 @@
+               containerPort: 8080
+           resources:
+             limits:
+-              cpu: 250m
+-              memory: 128Mi
++              cpu: 500m
++              memory: 256Mi
+             requests:
+-              cpu: 50m
+-              memory: 64Mi
++              cpu: 100m
++              memory: 128Mi
+ 
+ ---
+ # Source: claims-management/templates/deployment.yaml
+@@ -108,24 +108,24 @@
+ kind: Deployment
+ metadata:
+   name: claims-app-backend
+-  namespace: claims-dev
++  namespace: claims-qa
+   labels:
+     app: claims-management
+     component: backend
+-    environment: dev
++    environment: qa
+ spec:
+-  replicas: 1
++  replicas: 2
+   selector:
+     matchLabels:
+       app: claims-management
+       component: backend
+-      environment: dev
++      environment: qa
+   template:
+     metadata:
+       labels:
+         app: claims-management
+         component: backend
+-        environment: dev
++        environment: qa
+     spec:
+       containers:
+         - name: backend
+@@ -141,15 +141,15 @@
+             - name: DB_PASSWORD
+               valueFrom:
+                 secretKeyRef:
+-                  name: claims-dev-secret
++                  name: claims-qa-secret
+                   key: DB_PASSWORD
+           resources:
+             limits:
+               cpu: 500m
+-              memory: 256Mi
++              memory: 512Mi
+             requests:
+-              cpu: 100m
+-              memory: 128Mi
++              cpu: 200m
++              memory: 256Mi
+           readinessProbe:
+             httpGet:
+               path: /api/health

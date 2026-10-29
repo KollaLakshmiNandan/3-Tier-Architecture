@@ -1,0 +1,137 @@
+--- usecase15/evidence/rendered/qa.yaml	2026-10-29 16:29:08
++++ usecase15/evidence/rendered/stage.yaml	2026-10-29 16:29:08
+@@ -4,12 +4,12 @@
+ kind: ConfigMap
+ metadata:
+   name: claims-app-config
+-  namespace: claims-qa
++  namespace: claims-stage
+   labels:
+     app: claims-management
+-    environment: qa
++    environment: stage
+ data:
+-  APP_ENV: "qa"
++  APP_ENV: "stage"
+   LOG_LEVEL: "INFO"
+   DB_HOST: "claims-postgres"
+   DB_PORT: "5432"
+@@ -22,17 +22,17 @@
+ kind: Service
+ metadata:
+   name: claims-app-frontend
+-  namespace: claims-qa
++  namespace: claims-stage
+   labels:
+     app: claims-management
+     component: frontend
+-    environment: qa
++    environment: stage
+ spec:
+   type: ClusterIP
+   selector:
+     app: claims-management
+     component: frontend
+-    environment: qa
++    environment: stage
+   ports:
+     - name: http
+       port: 80
+@@ -45,17 +45,17 @@
+ kind: Service
+ metadata:
+   name: claims-app-backend
+-  namespace: claims-qa
++  namespace: claims-stage
+   labels:
+     app: claims-management
+     component: backend
+-    environment: qa
++    environment: stage
+ spec:
+   type: ClusterIP
+   selector:
+     app: claims-management
+     component: backend
+-    environment: qa
++    environment: stage
+   ports:
+     - name: http
+       port: 5000
+@@ -68,24 +68,24 @@
+ kind: Deployment
+ metadata:
+   name: claims-app-frontend
+-  namespace: claims-qa
++  namespace: claims-stage
+   labels:
+     app: claims-management
+     component: frontend
+-    environment: qa
++    environment: stage
+ spec:
+-  replicas: 1
++  replicas: 2
+   selector:
+     matchLabels:
+       app: claims-management
+       component: frontend
+-      environment: qa
++      environment: stage
+   template:
+     metadata:
+       labels:
+         app: claims-management
+         component: frontend
+-        environment: qa
++        environment: stage
+     spec:
+       containers:
+         - name: frontend
+@@ -108,24 +108,24 @@
+ kind: Deployment
+ metadata:
+   name: claims-app-backend
+-  namespace: claims-qa
++  namespace: claims-stage
+   labels:
+     app: claims-management
+     component: backend
+-    environment: qa
++    environment: stage
+ spec:
+   replicas: 2
+   selector:
+     matchLabels:
+       app: claims-management
+       component: backend
+-      environment: qa
++      environment: stage
+   template:
+     metadata:
+       labels:
+         app: claims-management
+         component: backend
+-        environment: qa
++        environment: stage
+     spec:
+       containers:
+         - name: backend
+@@ -141,14 +141,14 @@
+             - name: DB_PASSWORD
+               valueFrom:
+                 secretKeyRef:
+-                  name: claims-qa-secret
++                  name: claims-stage-secret
+                   key: DB_PASSWORD
+           resources:
+             limits:
+-              cpu: 500m
++              cpu: 1000m
+               memory: 512Mi
+             requests:
+-              cpu: 200m
++              cpu: 250m
+               memory: 256Mi
+           readinessProbe:
+             httpGet:

@@ -134,17 +134,10 @@ spec:
           ports:
             - name: http
               containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: claims-app-config
           env:
-            - name: APP_ENV
-              value: "qa"
-            - name: LOG_LEVEL
-              value: "INFO"
-            - name: DB_HOST
-              value: "claims-postgres"
-            - name: DB_NAME
-              value: "claimsdb"
-            - name: DB_USER
-              value: "claimsuser"
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
