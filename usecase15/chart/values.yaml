@@ -1,0 +1,46 @@
+environment: dev
+namespace: default
+
+image:
+  repository: claims-management
+  digest: ""
+  pullPolicy: IfNotPresent
+
+frontend:
+  replicaCount: 1
+  containerPort: 8080
+  servicePort: 80
+
+backend:
+  replicaCount: 1
+  containerPort: 5000
+  servicePort: 5000
+
+healthChecks:
+  enabled: true
+  path: /api/health
+
+labels:
+  app: claims-management
+
+config:
+  logLevel: INFO
+
+resources:
+  frontend:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  backend:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+secrets:
+  databaseSecretName: ""

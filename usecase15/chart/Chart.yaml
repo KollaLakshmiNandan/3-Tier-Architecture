@@ -1,0 +1,6 @@
+apiVersion: v2
+name: claims-management
+description: Helm chart for Use Case 15 multi-environment promotion
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

@@ -1,0 +1,34 @@
+environment: qa
+namespace: claims-qa
+
+frontend:
+  replicaCount: 1
+
+backend:
+  replicaCount: 2
+
+resources:
+  frontend:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  backend:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+config:
+  logLevel: INFO
+
+database:
+  host: claims-postgres
+  port: 5432
+  name: claimsdb
+  user: claimsuser
+  secretName: claims-qa-secret

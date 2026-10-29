@@ -1,0 +1,34 @@
+environment: prod-like
+namespace: claims-prod-like
+
+frontend:
+  replicaCount: 2
+
+backend:
+  replicaCount: 3
+
+resources:
+  frontend:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+  backend:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+config:
+  logLevel: INFO
+
+database:
+  host: claims-postgres
+  port: 5432
+  name: claimsdb
+  user: claimsuser
+  secretName: claims-prod-like-secret

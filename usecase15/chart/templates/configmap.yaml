@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.labels.app }}
+    environment: {{ .Values.environment }}
+data:
+  APP_ENV: {{ .Values.environment | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  DB_HOST: {{ .Values.database.host | quote }}
+  DB_PORT: {{ .Values.database.port | quote }}
+  DB_NAME: {{ .Values.database.name | quote }}
+  DB_USER: {{ .Values.database.user | quote }}

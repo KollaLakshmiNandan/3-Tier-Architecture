@@ -1,0 +1,60 @@
+{{- range $component := list "frontend" "backend" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-%s" $.Release.Name $component }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app: {{ $.Values.labels.app }}
+    component: {{ $component }}
+    environment: {{ $.Values.environment }}
+spec:
+  replicas: {{ index $.Values $component "replicaCount" }}
+  selector:
+    matchLabels:
+      app: {{ $.Values.labels.app }}
+      component: {{ $component }}
+      environment: {{ $.Values.environment }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.labels.app }}
+        component: {{ $component }}
+        environment: {{ $.Values.environment }}
+    spec:
+      containers:
+        - name: {{ $component }}
+          image: "{{ index $.Values $component "image" "repository" }}@{{ index $.Values $component "image" "digest" }}"
+          imagePullPolicy: {{ index $.Values $component "image" "pullPolicy" }}
+          ports:
+            - name: http
+              containerPort: {{ index $.Values $component "containerPort" }}
+          {{- if eq $component "backend" }}
+          envFrom:
+            - configMapRef:
+                name: {{ $.Release.Name }}-config
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.database.secretName }}
+                  key: DB_PASSWORD
+          {{- end }}
+          resources:
+{{ toYaml (index $.Values.resources $component) | indent 12 }}
+          {{- if and $.Values.healthChecks.enabled (eq $component "backend") }}
+          readinessProbe:
+            httpGet:
+              path: {{ $.Values.healthChecks.path }}
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: {{ $.Values.healthChecks.path }}
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          {{- end }}
+---
+{{- end }}

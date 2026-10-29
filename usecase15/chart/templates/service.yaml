@@ -1,0 +1,23 @@
+{{- range $component := list "frontend" "backend" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-%s" $.Release.Name $component }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app: {{ $.Values.labels.app }}
+    component: {{ $component }}
+    environment: {{ $.Values.environment }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ $.Values.labels.app }}
+    component: {{ $component }}
+    environment: {{ $.Values.environment }}
+  ports:
+    - name: http
+      port: {{ index $.Values $component "servicePort" }}
+      targetPort: http
+      protocol: TCP
+---
+{{- end }}
