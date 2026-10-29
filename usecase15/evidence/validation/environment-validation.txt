@@ -1,0 +1,46 @@
+Use Case 15 - Environment Configuration Validation
+Date: Thu Oct 29 19:52:29 IST 2026
+
+===== dev =====
+  namespace: claims-dev
+  namespace: claims-dev
+  namespace: claims-dev
+  namespace: claims-dev
+  replicas: 1
+  namespace: claims-dev
+  replicas: 1
+                secretKeyRef:
+                  name: claims-dev-secret
+
+===== qa =====
+  namespace: claims-qa
+  namespace: claims-qa
+  namespace: claims-qa
+  namespace: claims-qa
+  replicas: 1
+  namespace: claims-qa
+  replicas: 2
+                secretKeyRef:
+                  name: claims-qa-secret
+
+===== stage =====
+  namespace: claims-stage
+  namespace: claims-stage
+  namespace: claims-stage
+  namespace: claims-stage
+  replicas: 2
+  namespace: claims-stage
+  replicas: 2
+                secretKeyRef:
+                  name: claims-stage-secret
+
+===== prod-like =====
+  namespace: claims-prod-like
+  namespace: claims-prod-like
+  namespace: claims-prod-like
+  namespace: claims-prod-like
+  replicas: 2
+  namespace: claims-prod-like
+  replicas: 3
+                secretKeyRef:
+                  name: claims-prod-like-secret

@@ -1,18 +1,21 @@
 environment: dev
-namespace: default
-
-image:
-  repository: claims-management
-  digest: ""
-  pullPolicy: IfNotPresent
+namespace: claims-dev
 
 frontend:
   replicaCount: 1
+  image:
+    repository: devopshub-frontend
+    digest: "sha256:fcd7207178ba39d73f6150b7c54510bd927b0b63d111fca81f164fcd76534c75"
+    pullPolicy: IfNotPresent
   containerPort: 8080
   servicePort: 80
 
 backend:
   replicaCount: 1
+  image:
+    repository: devopshub-backend
+    digest: "sha256:2a7a137cf789991fac81c5e793b49cca40af63574c4983ff41be2bd751baaddb"
+    pullPolicy: IfNotPresent
   containerPort: 5000
   servicePort: 5000
 
@@ -25,6 +28,13 @@ labels:
 
 config:
   logLevel: INFO
+
+database:
+  name: claimsdb
+  user: claimsuser
+  host: claims-postgres
+  port: 5432
+  secretName: claims-dev-secret
 
 resources:
   frontend:
@@ -41,6 +51,3 @@ resources:
     limits:
       cpu: 500m
       memory: 256Mi
-
-secrets:
-  databaseSecretName: ""

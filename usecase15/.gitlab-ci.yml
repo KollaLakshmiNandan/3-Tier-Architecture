@@ -1,0 +1,114 @@
+stages:
+  - test
+  - validate
+  - evidence
+
+variables:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+unit_test:
+  stage: test
+  tags:
+    - macos
+  script:
+    - cd usecase15/application/backend
+    - python3 -m venv .venv
+    - .venv/bin/python -m pip install -r requirements.txt
+    - .venv/bin/python -m unittest -v test_app.py
+
+helm_lint:
+  stage: validate
+  tags:
+    - macos
+  script:
+    - helm lint usecase15/chart -f usecase15/values/values-common.yaml -f usecase15/values/values-dev.yaml
+
+render_environments:
+  stage: validate
+  tags:
+    - macos
+  script:
+    - mkdir -p usecase15/evidence/ci-rendered
+    - |
+      set -eu
+      for env in dev qa stage prod-like; do
+        helm template claims-app usecase15/chart \
+          -f usecase15/values/values-common.yaml \
+          -f "usecase15/values/values-${env}.yaml" \
+          --namespace "claims-${env}" \
+          > "usecase15/evidence/ci-rendered/${env}.yaml"
+        test -s "usecase15/evidence/ci-rendered/${env}.yaml"
+        echo "PASS: ${env} rendered"
+      done
+  artifacts:
+    when: always
+    paths:
+      - usecase15/evidence/ci-rendered/
+    expire_in: 30 days
+
+validate_image_digests:
+  stage: validate
+  tags:
+    - macos
+  script:
+    - |
+      set -eu
+      reference=""
+      for env in dev qa stage prod-like; do
+        file="usecase15/evidence/rendered/${env}.yaml"
+        helm template claims-app usecase15/chart \
+          -f usecase15/values/values-common.yaml \
+          -f "usecase15/values/values-${env}.yaml" \
+          --namespace "claims-${env}" > "$file"
+
+        images="$(grep 'image:.*@sha256:' "$file" | sed 's/^[[:space:]]*image: "//; s/"$//' | sort)"
+        count="$(printf '%s\n' "$images" | grep -c '@sha256:' || true)"
+        test "$count" -eq 2
+
+        if [ -z "$reference" ]; then
+          reference="$images"
+        elif [ "$images" != "$reference" ]; then
+          echo "FAIL: image digests differ in ${env}"
+          exit 1
+        fi
+        echo "PASS: ${env} uses the same two image digests"
+      done
+
+collect_validation_evidence:
+  stage: evidence
+  tags:
+    - macos
+  needs:
+    - job: unit_test
+      artifacts: false
+    - job: helm_lint
+      artifacts: false
+    - job: render_environments
+      artifacts: true
+    - job: validate_image_digests
+      artifacts: false
+  script:
+    - mkdir -p usecase15/evidence/ci
+    - |
+      {
+        echo "Use Case 15 - CI Validation Evidence"
+        echo "Date: $(date)"
+        echo "Commit: ${CI_COMMIT_SHA:-local}"
+        echo "Branch: ${CI_COMMIT_REF_NAME:-local}"
+        echo "Deployment performed: NO"
+        echo
+        echo "Unit tests: PASS (required job dependency)"
+        echo "Helm lint: PASS (required job dependency)"
+        echo "Image digest validation: PASS (required job dependency)"
+        echo "Rendered environments:"
+        for env in dev qa stage prod-like; do
+          test -s "usecase15/evidence/ci-rendered/${env}.yaml"
+          echo "${env}: PASS"
+        done
+      } | tee usecase15/evidence/ci/validation-summary.txt
+  artifacts:
+    when: always
+    paths:
+      - usecase15/evidence/ci/
+      - usecase15/evidence/ci-rendered/
+    expire_in: 30 days

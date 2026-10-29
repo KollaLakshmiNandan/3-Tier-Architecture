@@ -1,39 +1,48 @@
-# Use Case 15 — Multi-Environment Promotion Validation
+# Use Case 15: Multi-Environment Promotion Validation Summary
 
-## Objective
-Validate Helm rendering and confirm consistent application artifact
-references across DEV, QA, STAGE, and PROD-LIKE.
+## Validation Context
 
-## Validation results
-- Helm lint passed for all four environments.
-- Helm template completed successfully for all four environments.
-- Frontend image reference is identical across all environments.
-- Backend image reference is identical across all environments.
-- No REPLACE_WITH_ digest placeholders remain in the checked values
-  and rendered manifests.
+- Branch: feature/usecase14-blue-green-deployment
+- Kubernetes context: docker-desktop
+- Scope: Dev, QA, Stage, and Prod-like
+- Deployment performed: No
 
-## Replica configuration
+## Passed Checks
 
-| Environment | Frontend replicas | Backend replicas |
-|---|---:|---:|
-| DEV | 1 | 1 |
-| QA | 1 | 2 |
-| STAGE | 2 | 2 |
-| PROD-LIKE | 2 | 3 |
+1. Helm chart lint passed with zero chart failures.
+2. Helm rendering succeeded for Dev, QA, Stage, and Prod-like.
+3. All environments use the same frontend image digest:
+   `sha256:fcd7207178ba39d73f6150b7c54510bd927b0b63d111fca81f164fcd76534c75`
+4. All environments use the same backend image digest:
+   `sha256:2a7a137cf789991fac81c5e793b49cca40af63574c4983ff41be2bd751baaddb`
+5. Environment-specific configuration, replica counts, and Secret references were verified in rendered manifests.
+6. Dev-vs-QA, QA-vs-Stage, and Stage-vs-Prod-like diff files were generated.
+7. Promotion approval and rollback procedures were documented.
 
-## Artifact references currently configured
+## Evidence Files
 
-Frontend:
-devopshub-frontend@sha256:fcd7207178ba39d73f6150b7c54510bd927b0b63d111fca81f164fcd76534c75
+- `evidence/validation/helm-validation.txt`
+- `evidence/validation/image-consistency.txt`
+- `evidence/validation/secret-validation.txt`
+- `evidence/rendered/dev.yaml`
+- `evidence/rendered/qa.yaml`
+- `evidence/rendered/stage.yaml`
+- `evidence/rendered/prod-like.yaml`
+- `evidence/diffs/dev-vs-qa.diff`
+- `evidence/diffs/qa-vs-stage.diff`
+- `evidence/diffs/stage-vs-prod-like.diff`
 
-Backend:
-devopshub-backend@sha256:2a7a137cf789991fac81c5e793b49cca40af63574c4983ff41be2bd751baaddb
+## Outstanding Items
 
-## Outstanding checks
-- Confirm the frontend API proxy targets the stable backend Service.
-- Confirm images are available to the target Kubernetes cluster.
-- Confirm environment-specific database Secrets exist with the required keys.
-- Validate rollback procedure and approval gates before deployment.
+1. The `claims-dev` namespace exists, but the expected `claims-dev-secret` is missing. An existing Secret named `claims-secret` was found.
+2. The `claims-qa`, `claims-stage`, and `claims-prod-like` namespaces do not exist.
+3. The expected database Secrets for QA, Stage, and Prod-like have not been verified because their namespaces are missing.
+4. Image availability in a target registry has not been verified.
+5. Live deployment, health checks, application tests, promotion approvals, and rollback execution have not been performed.
 
-## Deployment status
-No deployment performed as part of these validation steps.
+## Conclusion
+
+Helm rendering, configuration comparison, and image-digest consistency checks passed.
+Use Case 15 is not yet deployment-validated. Resolve the outstanding prerequisites
+and collect deployment and application validation evidence before declaring the
+promotion workflow fully validated.

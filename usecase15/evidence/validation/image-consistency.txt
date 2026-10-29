@@ -1,0 +1,23 @@
+Use Case 15 - Image Digest Consistency Evidence
+Date: Thu Oct 29 17:59:49 IST 2026
+Branch: feature/usecase14-blue-green-deployment
+
+===== dev =====
+          image: "devopshub-frontend@sha256:fcd7207178ba39d73f6150b7c54510bd927b0b63d111fca81f164fcd76534c75"
+          image: "devopshub-backend@sha256:2a7a137cf789991fac81c5e793b49cca40af63574c4983ff41be2bd751baaddb"
+
+===== qa =====
+          image: "devopshub-frontend@sha256:fcd7207178ba39d73f6150b7c54510bd927b0b63d111fca81f164fcd76534c75"
+          image: "devopshub-backend@sha256:2a7a137cf789991fac81c5e793b49cca40af63574c4983ff41be2bd751baaddb"
+
+===== stage =====
+          image: "devopshub-frontend@sha256:fcd7207178ba39d73f6150b7c54510bd927b0b63d111fca81f164fcd76534c75"
+          image: "devopshub-backend@sha256:2a7a137cf789991fac81c5e793b49cca40af63574c4983ff41be2bd751baaddb"
+
+===== prod-like =====
+          image: "devopshub-frontend@sha256:fcd7207178ba39d73f6150b7c54510bd927b0b63d111fca81f164fcd76534c75"
+          image: "devopshub-backend@sha256:2a7a137cf789991fac81c5e793b49cca40af63574c4983ff41be2bd751baaddb"
+
+Expected result: Identical frontend and backend image digests across all environments.
+Registry availability: NOT VERIFIED
+Deployment performed: NO
