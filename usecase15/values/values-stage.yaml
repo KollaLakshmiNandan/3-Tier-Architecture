@@ -1,5 +1,5 @@
 environment: stage
-namespace: claims-stage
+namespace: usecase15-stage
 
 frontend:
   replicaCount: 2
@@ -27,8 +27,8 @@ config:
   logLevel: INFO
 
 database:
-  host: claims-postgres
+  host: usecase15-postgres.usecase15-dev.svc.cluster.local
   port: 5432
-  name: claimsdb
+  name: claimsdb_stage
   user: claimsuser
-  secretName: claims-stage-secret
+  secretName: usecase15-stage-secret

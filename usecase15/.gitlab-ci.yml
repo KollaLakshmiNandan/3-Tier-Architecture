@@ -39,7 +39,7 @@ render_environments:
         helm template claims-app usecase15/chart \
           -f usecase15/values/values-common.yaml \
           -f "usecase15/values/values-${env}.yaml" \
-          --namespace "claims-${env}" \
+          --namespace "usecase15-${env}" \
           > "usecase15/evidence/ci-rendered/${env}.yaml"
         test -s "usecase15/evidence/ci-rendered/${env}.yaml"
         echo "PASS: ${env} rendered"
@@ -64,7 +64,7 @@ validate_image_digests:
         helm template claims-app usecase15/chart \
           -f usecase15/values/values-common.yaml \
           -f "usecase15/values/values-${env}.yaml" \
-          --namespace "claims-${env}" > "$file"
+          --namespace "usecase15-${env}" > "$file"
 
         images="$(grep 'image:.*@sha256:' "$file" | sed 's/^[[:space:]]*image: "//; s/"$//' | sort)"
         count="$(printf '%s\n' "$images" | grep -c '@sha256:' || true)"

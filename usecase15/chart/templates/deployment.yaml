@@ -22,6 +22,9 @@ spec:
         component: {{ $component }}
         environment: {{ $.Values.environment }}
     spec:
+      imagePullSecrets:
+        - name: gitlab-registry
+
       containers:
         - name: {{ $component }}
           image: "{{ index $.Values $component "image" "repository" }}@{{ index $.Values $component "image" "digest" }}"

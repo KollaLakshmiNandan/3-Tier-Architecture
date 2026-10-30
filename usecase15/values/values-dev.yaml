@@ -1,5 +1,5 @@
 environment: dev
-namespace: claims-dev
+namespace: usecase15-dev
 
 frontend:
   replicaCount: 1
@@ -27,8 +27,8 @@ config:
   logLevel: DEBUG
 
 database:
-  host: claims-postgres
+  host: usecase15-postgres.usecase15-dev.svc.cluster.local
   port: 5432
-  name: claimsdb
+  name: claimsdb_dev
   user: claimsuser
-  secretName: claims-dev-secret
+  secretName: usecase15-dev-secret

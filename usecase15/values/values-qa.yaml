@@ -1,5 +1,5 @@
 environment: qa
-namespace: claims-qa
+namespace: usecase15-qa
 
 frontend:
   replicaCount: 1
@@ -27,8 +27,8 @@ config:
   logLevel: INFO
 
 database:
-  host: claims-postgres
+  host: usecase15-postgres.usecase15-dev.svc.cluster.local
   port: 5432
-  name: claimsdb
+  name: claimsdb_qa
   user: claimsuser
-  secretName: claims-qa-secret
+  secretName: usecase15-qa-secret

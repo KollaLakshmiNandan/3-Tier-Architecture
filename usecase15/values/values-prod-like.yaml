@@ -1,5 +1,5 @@
 environment: prod-like
-namespace: claims-prod-like
+namespace: usecase15-prod-like
 
 frontend:
   replicaCount: 2
@@ -27,8 +27,8 @@ config:
   logLevel: INFO
 
 database:
-  host: claims-postgres
+  host: usecase15-postgres.usecase15-dev.svc.cluster.local
   port: 5432
-  name: claimsdb
+  name: claimsdb_prod
   user: claimsuser
-  secretName: claims-prod-like-secret
+  secretName: usecase15-prod-like-secret

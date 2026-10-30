@@ -1,5 +1,5 @@
 environment: dev
-namespace: claims-dev
+namespace: usecase15-dev
 
 frontend:
   replicaCount: 1
@@ -34,7 +34,7 @@ database:
   user: claimsuser
   host: claims-postgres
   port: 5432
-  secretName: claims-dev-secret
+  secretName: usecase15-dev-secret
 
 resources:
   frontend:
