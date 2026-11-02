@@ -1,0 +1,69 @@
+
+stages:
+  - validate
+  - test
+  - build
+  - security
+
+variables:
+  TF_IN_AUTOMATION: "true"
+
+helm-validation:
+  stage: validate
+  tags:
+    - macos
+  script:
+    - helm lint usecase16/helm
+    - helm template usecase16 usecase16/helm --namespace usecase16-lab > /tmp/usecase16-rendered.yaml
+
+terraform-validation:
+  stage: validate
+  tags:
+    - macos
+  script:
+    - terraform -chdir=usecase16/terraform init -backend=false
+    - terraform -chdir=usecase16/terraform validate
+
+shell-validation:
+  stage: validate
+  tags:
+    - macos
+  script:
+    - bash -n usecase16/scripts/simulate-drift.sh
+    - bash -n usecase16/scripts/verify-state.sh
+
+backend-tests:
+  stage: test
+  tags:
+    - macos
+  script:
+    - cd usecase16/backend
+    - python3 -m venv .venv
+    - .venv/bin/python -m pip install -r requirements.txt
+    - .venv/bin/python -m unittest test_app.py
+
+frontend-build:
+  stage: build
+  tags:
+    - macos
+  script:
+    - cd usecase16/frontend
+    - npm ci
+    - npm run build
+
+docker-build:
+  stage: build
+  tags:
+    - macos
+  script:
+    - docker build -t usecase16-backend:$CI_COMMIT_SHORT_SHA ./usecase16/backend
+    - docker build -t usecase16-frontend:$CI_COMMIT_SHORT_SHA ./usecase16/frontend
+
+trivy-scan:
+  stage: security
+  tags:
+    - macos
+  script:
+    - trivy image --exit-code 0 --severity HIGH,CRITICAL usecase16-backend:$CI_COMMIT_SHORT_SHA
+    - trivy image --exit-code 0 --severity HIGH,CRITICAL usecase16-frontend:$CI_COMMIT_SHORT_SHA
+

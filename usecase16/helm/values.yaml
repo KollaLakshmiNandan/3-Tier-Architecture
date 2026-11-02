@@ -1,0 +1,33 @@
+
+namespace: usecase16-lab
+
+frontend:
+  replicaCount: 2
+  image:
+    repository: usecase16-frontend
+    tag: dev
+    pullPolicy: IfNotPresent
+  service:
+    name: claims-frontend
+    port: 8080
+
+backend:
+  replicaCount: 2
+  image:
+    repository: usecase16-backend
+    tag: dev
+    pullPolicy: IfNotPresent
+  service:
+    name: claims-backend
+    port: 5000
+
+postgres:
+  image: postgres:16-alpine
+  service:
+    name: postgres
+    port: 5432
+  database: claimsdb
+  username: claimsuser
+  storage: 2Gi
+  secretName: claims-db-secret
+
