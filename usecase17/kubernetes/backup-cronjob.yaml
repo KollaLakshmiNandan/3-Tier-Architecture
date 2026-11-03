@@ -1,0 +1,77 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup-cron
+  namespace: usecase17
+
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+
+      template:
+        spec:
+          restartPolicy: OnFailure
+
+          containers:
+            - name: postgres-backup
+              image: postgres:16-alpine
+
+              env:
+                - name: PGHOST
+                  value: host.docker.internal
+
+                - name: PGPORT
+                  value: "5433"
+
+                - name: PGUSER
+                  value: claimsuser
+
+                - name: PGDATABASE
+                  value: claimsdb
+
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-backup-secret
+                      key: POSTGRES_PASSWORD
+
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="/backups/claimsdb_${TIMESTAMP}.dump"
+
+                  echo "Starting PostgreSQL backup..."
+
+                  pg_dump -Fc -f "$BACKUP_FILE"
+
+                  test -s "$BACKUP_FILE"
+
+                  pg_restore --list "$BACKUP_FILE" > /dev/null
+
+                  echo "Backup completed successfully!"
+                  echo "Backup file: $BACKUP_FILE"
+
+                  ls -1t /backups/claimsdb_*.dump 2>/dev/null |
+                    tail -n +8 |
+                    while read -r file; do
+                      rm -f "$file"
+                    done
+
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: postgres-backup-pvc

@@ -1,0 +1,101 @@
+usecase17-backup-validation:
+  stage: validate
+  tags:
+    - macos
+
+  script:
+    - |
+      set -e
+
+      cd usecase17
+
+      # Isolate CI database and volumes from local environment
+      export COMPOSE_PROJECT_NAME="usecase17-ci-${CI_JOB_ID:-local}"
+
+      echo "===== STEP 1: Shell Validation ====="
+
+      bash -n scripts/backup.sh
+      bash -n scripts/restore.sh
+
+      echo "Shell validation passed"
+
+      echo "===== STEP 2: Docker Compose Validation ====="
+
+      export POSTGRES_PASSWORD="ci-test-password-123"
+
+      docker compose config --quiet
+
+      echo "Docker Compose validation passed"
+
+      echo "===== STEP 3: Start Isolated PostgreSQL ====="
+
+      trap 'docker compose down -v --remove-orphans' EXIT
+
+      docker compose up -d
+
+      for i in $(seq 1 30); do
+        if docker compose exec -T postgres \
+          pg_isready -U claimsuser -d claimsdb; then
+          break
+        fi
+
+        if [ "$i" -eq 30 ]; then
+          echo "PostgreSQL failed to become ready"
+          exit 1
+        fi
+
+        sleep 2
+      done
+
+      echo "PostgreSQL is ready"
+
+      echo "===== STEP 4: Insert Test Data ====="
+
+      docker compose exec -T postgres \
+        psql -U claimsuser -d claimsdb -c "
+        INSERT INTO users (name, email, password_hash)
+        VALUES ('CI Test', 'ci-test@example.com', 'test_hash');
+
+        INSERT INTO claims
+        (user_id, customer_name, amount, description)
+        VALUES (1, 'CI Customer', 5000, 'CI backup test');
+        "
+
+      echo "Test data inserted"
+
+      echo "===== STEP 5: Execute Backup ====="
+
+      ./scripts/backup.sh
+
+      echo "===== STEP 6: Create Recovery Database ====="
+
+      docker compose exec -T postgres \
+        createdb -U claimsuser claimsdb_recovery
+
+      echo "Recovery database created"
+
+      echo "===== STEP 7: Execute Restore ====="
+
+      DB_NAME=claimsdb_recovery ./scripts/restore.sh
+
+      echo "===== STEP 8: Verify Restored Data ====="
+
+      CLAIM_COUNT=$(docker compose exec -T postgres \
+        psql -U claimsuser -d claimsdb_recovery \
+        -tAc "SELECT COUNT(*) FROM claims;")
+
+      echo "Recovered claims: $CLAIM_COUNT"
+
+      test "$CLAIM_COUNT" = "1"
+
+      echo "===== STEP 9: Secret Protection ====="
+
+      if git -C "$CI_PROJECT_DIR" ls-files \
+        --error-unmatch usecase17/.env >/dev/null 2>&1; then
+        echo "ERROR: .env must not be committed"
+        exit 1
+      fi
+
+      echo ".env protection passed"
+
+      echo "===== USE CASE 17 CI/CD SUCCESS ====="

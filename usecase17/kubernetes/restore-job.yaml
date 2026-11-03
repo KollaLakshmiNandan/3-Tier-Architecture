@@ -1,0 +1,79 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-restore-job
+  namespace: usecase17
+
+spec:
+  backoffLimit: 1
+
+  template:
+    spec:
+      restartPolicy: Never
+
+      containers:
+        - name: postgres-restore
+          image: postgres:16-alpine
+
+          env:
+            - name: PGHOST
+              value: host.docker.internal
+
+            - name: PGPORT
+              value: "5433"
+
+            - name: PGUSER
+              value: claimsuser
+
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-backup-secret
+                  key: POSTGRES_PASSWORD
+
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+
+              echo "Starting Kubernetes disaster recovery..."
+
+              BACKUP_FILE=$(ls -1t /backups/claimsdb_*.dump | head -n 1)
+
+              if [ -z "$BACKUP_FILE" ]; then
+                echo "ERROR: No backup found"
+                exit 1
+              fi
+
+              echo "Selected backup: $BACKUP_FILE"
+
+              if ! psql -d postgres -tAc \
+                "SELECT 1 FROM pg_database WHERE datname='claimsdb_k8s_recovery'" | grep -q 1; then
+                createdb claimsdb_k8s_recovery
+              fi
+
+              pg_restore \
+                --clean \
+                --if-exists \
+                --no-owner \
+                --no-privileges \
+                -d claimsdb_k8s_recovery \
+                "$BACKUP_FILE"
+
+              echo "Database restoration completed!"
+
+              psql -d claimsdb_k8s_recovery \
+                -c "SELECT id, claim_number, customer_name, amount FROM claims;"
+
+              echo "Kubernetes disaster recovery successful!"
+
+          volumeMounts:
+            - name: backup-storage
+              mountPath: /backups
+              readOnly: true
+
+      volumes:
+        - name: backup-storage
+          persistentVolumeClaim:
+            claimName: postgres-backup-pvc
