@@ -1,14 +1,47 @@
 import os
+import json
+import logging
+import sys
+import time
+import uuid
+
 from functools import wraps
 from decimal import Decimal, InvalidOperation
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, g
 from flask_cors import CORS
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+class JSONFormatter(logging.Formatter):
+    def format(self, record):
+        log_data = {
+            "timestamp": self.formatTime(record),
+            "level": record.levelname,
+            "service": "claims-backend",
+            "message": record.getMessage(),
+            "request_id": getattr(record, "request_id", None),
+        }
 
+        for field in ("method", "path", "status_code", "duration_ms"):
+            value = getattr(record, field, None)
+            if value is not None:
+                log_data[field] = value
+
+        if record.exc_info:
+            log_data["exception"] = self.formatException(record.exc_info)
+
+        return json.dumps(log_data)
+
+
+log_handler = logging.StreamHandler(sys.stdout)
+log_handler.setFormatter(JSONFormatter())
+
+app.logger.handlers.clear()
+app.logger.addHandler(log_handler)
+app.logger.setLevel(logging.INFO)
+app.logger.propagate = False
 secret_key = os.getenv("FLASK_SECRET_KEY")
 if not secret_key:
     raise RuntimeError("FLASK_SECRET_KEY environment variable is required")
@@ -21,7 +54,31 @@ app.config.update(
 )
 
 CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
+@app.before_request
+def start_request():
+    g.request_id = str(uuid.uuid4())
+    g.request_start_time = time.time()
 
+
+@app.after_request
+def log_request(response):
+    duration = round(
+        (time.time() - g.request_start_time) * 1000, 2
+    )
+
+    app.logger.info(
+        "HTTP request completed",
+        extra={
+            "request_id": g.request_id,
+            "method": request.method,
+            "path": request.path,
+            "status_code": response.status_code,
+            "duration_ms": duration,
+        },
+    )
+
+    response.headers["X-Request-ID"] = g.request_id
+    return response
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "localhost"),
     "database": os.getenv("DB_NAME", "claimsdb"),
@@ -244,7 +301,5 @@ def current_user():
         "name": session.get("user_name"),
         "email": session.get("user_email"),
     })
-
-
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)

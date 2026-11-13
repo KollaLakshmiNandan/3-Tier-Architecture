@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claims-backend
+  namespace: usecase18-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: claims-backend
+  template:
+    metadata:
+      labels:
+        app: claims-backend
+    spec:
+      containers:
+        - name: backend
+          image: claims-backend:usecase18
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: FLASK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: claims-app-secret
+                  key: FLASK_SECRET_KEY
+            - name: DB_HOST
+              value: claims-postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: claimsdb
+            - name: DB_USER
+              value: claimsuser
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: claims-db-secret
+                  key: POSTGRES_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: claims-backend
+  namespace: usecase18-lab
+spec:
+  selector:
+    app: claims-backend
+  ports:
+    - port: 5000
+      targetPort: 5000
+  type: ClusterIP

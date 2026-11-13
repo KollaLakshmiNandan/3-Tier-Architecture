@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claims-postgres
+  namespace: usecase18-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: claims-postgres
+  template:
+    metadata:
+      labels:
+        app: claims-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: claimsdb
+            - name: POSTGRES_USER
+              value: claimsuser
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: claims-db-secret
+                  key: POSTGRES_PASSWORD
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - claimsuser
+                - -d
+                - claimsdb
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: database-data
+              mountPath: /var/lib/postgresql/data
+            - name: database-init
+              mountPath: /docker-entrypoint-initdb.d/01-init.sql
+              subPath: init.sql
+      volumes:
+        - name: database-data
+          emptyDir: {}
+        - name: database-init
+          configMap:
+            name: claims-db-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: claims-postgres
+  namespace: usecase18-lab
+spec:
+  selector:
+    app: claims-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+  type: ClusterIP
