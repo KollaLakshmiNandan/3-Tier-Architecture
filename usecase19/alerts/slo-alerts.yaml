@@ -1,0 +1,18 @@
+groups:
+  - name: claims-slo-alerts
+    interval: 30s
+    rules:
+      - alert: UC19_API_Availability_Below_SLO
+        expr: |
+          (
+            sum(rate(claims_http_requests_total{status!~"4..|5.."}[5m]))
+            /
+            sum(rate(claims_http_requests_total[5m]))
+          ) * 100 < 99
+        for: 2m
+        labels:
+          severity: warning
+          usecase: "19"
+        annotations:
+          summary: "Claims API availability is below 99%"
+          description: "API availability has remained below the 99% SLO target for 2 minutes."

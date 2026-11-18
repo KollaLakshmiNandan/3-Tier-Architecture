@@ -1,0 +1,78 @@
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: uc19-postgres
+    environment:
+      POSTGRES_DB: claimsdb
+      POSTGRES_USER: claimsuser
+      POSTGRES_PASSWORD: claimspassword
+    ports:
+      - "5434:5432"
+    volumes:
+      - uc19-postgres-data:/var/lib/postgresql/data
+      - ./application/database/compose-init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U claimsuser -d claimsdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./application/backend
+    container_name: uc19-backend
+    environment:
+      FLASK_SECRET_KEY: uc19-development-secret
+      DB_HOST: postgres
+      DB_NAME: claimsdb
+      DB_USER: claimsuser
+      DB_PASSWORD: claimspassword
+      DB_PORT: 5432
+    ports:
+      - "5001:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: uc19-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./alertmanager/alertmanager-config.yaml:/etc/alertmanager/alertmanager.yml:ro
+      - ./alerts/slo-alerts.yaml:/etc/prometheus/alerts/slo-alerts.yaml:ro
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    depends_on:
+      - backend
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: uc19-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: uc19-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager/alertmanager-config.yaml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+    depends_on:
+      - prometheus
+
+volumes:
+  uc19-postgres-data:
+  prometheus-data:
+  grafana-data:
+

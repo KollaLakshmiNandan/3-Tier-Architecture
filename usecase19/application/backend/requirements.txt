@@ -1,0 +1,6 @@
+Flask
+Flask-Cors
+psycopg2-binary
+Werkzeug
+gunicorn
+prometheus-client
